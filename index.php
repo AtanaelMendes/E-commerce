@@ -1,20 +1,21 @@
-<?php 
+<?php
+
+use \Slim\Slim;
+use \Rootdir\PageController;
 
 require_once("vendor/autoload.php");
 
-$app = new \Slim\Slim();
+$app = new Slim();
 
 $app->config('debug', true);
 
 $app->get('/', function() {
     
-	$sql = new Project\DB\Sql();
+	$page = new PageController;
 
-	$results = $sql->select("select * from tb_users");
-
-	echo json_encode($results);
+	$page->setTpl("index");
+	
 });
 
 $app->run();
 
- ?>

@@ -1,6 +1,5 @@
-<?php 
-
-namespace Project\DB;
+<?php
+namespace Rootdir\DB;
 
 class Sql {
 
@@ -65,5 +64,3 @@ class Sql {
 	}
 
 }
-
- ?>
