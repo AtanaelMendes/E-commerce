@@ -10,19 +10,19 @@ $app = new Slim();
 
 $app->config('debug', true);
 
-// $app->get('/', function() {
-    
-// 	$page = new PageController;
-
-// 	$page->setTpl("index");
-	
-// });
-
-$app->get('/gestao-login', function() {
+$app->get('/gestao', function() {
     
 	$page = new PageAdminController;
 
 	$page->setTpl("index");
+	
+});
+
+$app->get('/', function() {
+    
+	$page = new PageController;
+
+ 	$page->setTpl("index");
 	
 });
 
