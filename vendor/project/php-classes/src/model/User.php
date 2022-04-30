@@ -76,7 +76,7 @@
                 "CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", [
                 "desperson" => $this->getdesperson(),
                 "deslogin" => $this->getdeslogin(),
-                "despassword" => $this->getdespassword(),
+                "despassword" => self::encriptPassword($this->getdespassword()),
                 "desemail" => $this->getdesemail(),
                 "nrphone" => $this->getnrphone(),
                 "inadmin" => $this->getinadmin()
@@ -91,7 +91,7 @@
                 "iduser" => $this->getiduser(),
                 "desperson" => $this->getdesperson(),
                 "deslogin" => $this->getdeslogin(),
-                "despassword" => $this->getdespassword(),
+                "despassword" => self::encriptPassword($this->getdespassword()),
                 "desemail" => $this->getdesemail(),
                 "nrphone" => $this->getnrphone(),
                 "inadmin" => $this->getinadmin()
@@ -118,8 +118,12 @@
             ]);
         }
 
-        public static function select(string $query, array $bind = []) : array {
+        private static function select(string $query, array $bind = []) : array {
             $DAO = new Sql();
             return $DAO->select($query, $bind);
+        }
+
+        private static function encriptPassword(string $password) : string {
+            return password_hash($password, PASSWORD_DEFAULT, ['cont' => 12]);
         }
     }

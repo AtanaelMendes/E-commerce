@@ -24,8 +24,7 @@
             }
         }
 
-        public function expose()
-        {
+        public function expose() {
             return $this->values;
         }
     }

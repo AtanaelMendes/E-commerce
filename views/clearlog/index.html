@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ClearLog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/views/clearlog/engine/favicon.ico">
+    <link href="/views/clearlog/engine/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/views/clearlog/engine/css/default.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>Preferências</h2>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row" style="overflow-y: scroll; max-height: 70vh;">
+                        <!-- limite de linhas -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <label for="marcatexto1">Retornar as últimas linhas do arquivo, se 0 retorna todo o arquivo.</label>
+                            <div class="input-group">
+                                <span class="input-group-addon" id="basic-addon1">Limite de linhas</span>
+                                <input type="number" value="2000" class="form-control" placeholder="Quantidade de linhas" id="linhas">
+                            </div>
+                        </div>
+                        <!-- Tempo de atualizacao monitor -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <label for="marcatexto1">Tempo de atualização do monitor, padrão é 1000ms</label>
+                            <div class="input-group">
+                                <span class="input-group-addon" id="basic-addon1">Tempo milisegundos</span>
+                                <input type="number" value="1000" class="form-control" placeholder="1000" id="tempomonitor" onchange="validaTempo()">
+                            </div>
+                        </div>
+                        <!-- Desabilitar som de aviso -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <input type="checkbox" aria-label="..." id="som-aviso">
+                                </span>
+                                <input type="text" class="form-control" value="Habilitar som de aviso" disabled="disabled">
+                            </div>
+                        </div>
+                        <!-- Desabilitar marca texto -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <input type="checkbox" aria-label="..." id="marcatextotoogle">
+                                </span>
+                                <input type="text" class="form-control" value="Habilitar marca texto" disabled="disabled">
+                            </div>
+                        </div>
+                        <!-- marca texto a -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <label for="marcatexto1">
+                                Separe as palavras por vírgula
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 1</span>
+                                <input type="color" class="form-control" value="#ffff00" aria-describedby="basic-addon1" id="cormarcatextoa">
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextoa">
+                            </div>
+                        </div>
+                        <!-- marca texto b -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 2</span>
+                                <input type="color" class="form-control" value="#f18cf5" id="cormarcatextob">
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextob">
+                            </div>
+                        </div>
+                        <!-- marca texto c -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 3</span>
+                                <input type="color" class="form-control" value="#03f4fc" id="cormarcatextoc">
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextoc">
+                            </div>
+                        </div>
+                        <!-- marca texto d -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 4</span>
+                                <input type="color" class="form-control" value="#b5fc03" id="cormarcatextod">
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextod">
+                            </div>
+                        </div>
+                        <!-- marca texto e -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 5</span>
+                                <div class="success-tag">SUCCESS</div>
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextoe">
+                            </div>
+                        </div>
+                        <!-- marca texto f -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 6</span>
+                                <div class="default-tag">DEFAULT</div>
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextof">
+                            </div>
+                        </div>
+                        <!-- marca texto g -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 7</span>
+                                <div class="info-tag">INFO</div>
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextog">
+                            </div>
+                        </div>
+                        <!-- marca texto h -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 8</span>
+                                <div class="warning-tag">WARNING</div>
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextoh">
+                            </div>
+                        </div>
+                        <!-- marca texto i -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 space-bottom">
+                            <div class="input-group">
+                                <span class="input-group-addon">Marca texto 9</span>
+                                <div class="danger-tag">DANGER</div>
+                                <input type="text" class="form-control" placeholder="ex: palavra1, palavra2, palavra3" id="marcatextoi">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="atualizaConfiguracao()">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <!-- fim modal -->
+
+    <div class="container-fluid">
+        <div class="row" id="first-row">
+
+            <!-- navbar -->
+            <ul class="nav nav-tabs navbar-fixed-top role='tablist'" style="background-image: url(/views/clearlog/engine/matrix.gif);">
+                <!-- <ul class="nav nav-tabs navbar-inverse navbar-fixed-top role='tablist'"> -->
+                <li role="presentation" class="active" onclick="pegaListaDeLog()">
+                    <a aria-controls="menu2" role="tab" href="#menu2" data-toggle="tab">Leitura de log</a>
+                </li>
+                <li role="presentation">
+                    <a aria-controls="menu0" role="tab" href="#menu0" data-toggle="tab">Atividade</a>
+                </li>
+                <li style="display: flex; align-items: center;">
+                    <div style="background-color: white; padding-left: 5px; height: 44px; width: 44px;" class="img-circle">
+                        <img style="margin-left: -6px;" class="img-responsive img-circle" src='/views/clearlog/engine/banana.gif' />
+                    </div>
+                    <div style="padding-left: 5px;">
+                        <button onclick="executarLimpeza()" class="btn btn-danger btn-sm" data-toggle='tooltip' data-placement='left' title="Limpar os novos e excluir os antigos">
+                            Limpar Tudo
+                        </button>
+                    </div>
+                    <div style="padding-left: 5px;">
+                        <button id="myBtn" class="btn btn-link btn-sm">
+                            <img src="/views/clearlog/engine/config.png" style="height: 25px; width: 25px; filter: invert(100%);" />
+                        </button>
+                    </div>
+                    <div style="padding-left: 5px;">
+                        <button id="myBtn" class="btn btn-default btn-sm">
+                            <a style="text-decoration: none;" href="#menu-toggle" id="menu-toggle">Menu lateral</a>
+                        </button>
+                    </div>
+                    <div id="alertas" style="padding-left:5px; height: 30px; max-width: 400px;"></div>
+                </li>
+            </ul>
+            <!-- nav bar fim -->
+
+            <!-- conteudo -->
+            <div class="tab-content col-xs-12">
+
+                <div role="tabpanel" id="menu0" class="tab-pane fade row" style="background-color: black; min-height: 100vh">
+                    <div id="conteudo" name="conteudo"></div>
+                    <div id="sound"></div>
+                </div>
+
+                <div role="tabpanel" id="menu2" class="tab-pane fade in active">
+
+                    <!-- page-content-wrapper -->
+                    <div id="wrapper">
+                        <!-- Sidebar -->
+                        <div id="sidebar-wrapper" name="sidebar-wrapper" id="sidebar-wrapper" style="overflow: auto; padding-bottom: 200px">
+                            <div style="padding: 5px;">
+                                <button id="btn-reload-tree" class="btn-reload-inverse" style="float: right;" onclick="pegaListaDeLog(true)">
+                                    <img src="/views/clearlog/engine/reload.png" style="height: 25px; width: 25px; filter: invert(100%);" />
+                                </button>
+                            </div>
+                            <div id="arvore-de-log">
+                                <!-- content dinamicaly added -->
+                            </div>
+                        </div>
+                        <!-- /#sidebar-wrapper -->
+
+                        <!-- Page Content -->
+                        <div id="page-content-wrapper">
+                            <div id="scrollsmothtop"></div>
+                            <div class="row">
+                                <div class="col-lg-12" id="displaylog" name="displaylog" style="overflow-wrap: break-word;"></div>
+                            </div>
+                            <div id="scrollsmothbottom"></div>
+                        </div>
+                    </div>
+                    <!-- /#page-content-wrapper -->
+
+                </div>
+            </div>
+            <!-- fim conteudo -->
+
+            <button class="btn-scroll-up btn-custom">
+                <a href="#scrollsmothtop">
+                    <img src="/views/clearlog/engine/down-arrow.png" style="height: 25px; width: 25px;" />
+                </a>
+            </button>
+            <button class="btn-reload btn-custom" onclick="recarregaLog()">
+                <img src="/views/clearlog/engine/reload.png" style="height: 25px; width: 25px;" />
+            </button>
+            <button class="btn-scroll-down btn-custom">
+                <a href="#scrollsmothbottom">
+                    <img src="/views/clearlog/engine/down-arrow.png" style="height: 25px; width: 25px;" />
+                </a>
+            </button>
+        </div>
+        <!-- row -->
+    </div>
+    <!-- container -->
+    <script src="/views/clearlog/engine/js/jquery-min.js"></script>
+    <script src="/views/clearlog/engine/js/bootstrap.min.js"></script>
+    <script src="/views/clearlog/engine/js/default.js"></script>
+</body>
+
+</html>

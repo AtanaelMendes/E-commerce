@@ -4,6 +4,7 @@ session_start();
 use \Slim\Slim;
 use \Rootdir\PageController;
 use \Rootdir\PageAdminController;
+use \Rootdir\PageClearLogController;
 use \Rootdir\Model\User;
 
 require_once("vendor/autoload.php");
@@ -31,7 +32,6 @@ $app->get('/gestao/login', function() {
 //login
 $app->post('/gestao/login', function() {
 	User::login($_POST["login"], $_POST["password"]);
-	error_log(print_r("ERROR  ".basename(__FILE__)." linha-> ".__LINE__, true));
 	header("Location: /gestao");
 	exit();
 });
@@ -58,6 +58,17 @@ $app->get('/gestao/users/create', function() {
 	User::verifyLogin();
 	$page = new PageAdminController();
 	$page->setTpl("users-create");
+});
+
+// create user
+$app->post('/gestao/users/create', function() {
+	User::verifyLogin();
+	$user = new User();
+	$_POST["inadmin"] = (isset($_POST["inadmin"]) ? 1 : 0);
+	$user->setData($_POST);
+	$user->save();
+	header("Location: /gestao/users");
+	exit;
 });
 
 // delete user
@@ -93,17 +104,6 @@ $app->post('/gestao/users/:iduser', function(string $iduser) {
 	exit;
 });
 
-// create user
-$app->post('/gestao/users/create', function() {
-	User::verifyLogin();
-	$user = new User();
-	$_POST["inadmin"] = (isset($_POST["inadmin"]) ? 1 : 0);
-	$user->setData($_POST);
-	$user->save();
-	header("Location: /gestao/users");
-	exit;
-});
-
 // site
 $app->get('/', function() {
 	$page = new PageController();
@@ -112,17 +112,14 @@ $app->get('/', function() {
 });
 
 // site
-// $app->get('/clearlog', function() {
-	// return
-	// $page = new PageController(
-	// 	[
-	// 		"header" => false,
-	// 		"footer" => false
-	// 	],
-	// 	"/views/clearlog/mytools/"
-	// );
-	// $page->setTpl("clearLog3");
-// });
+$app->get('/clearlog', function() {
+	$page = new PageClearLogController([
+		"header" => false,
+		"footer" => false
+	]);
+	$page->setTpl("index");
+	exit;
+});
 
 $app->run();
 
