@@ -8,6 +8,8 @@ class PageController {
     private $tpl;
     private $options = [];
     private $defaults = [
+        "header" => true,
+		"footer" => true,
         "data" => []
     ];
 
@@ -26,7 +28,9 @@ class PageController {
 
         $this->setData($this->options["data"]);
 
-        $this->tpl->draw("header");
+        if ($this->options["header"]) {
+            $this->tpl->draw("header");
+        }
     }
 
     public function setData($data = []) {
@@ -46,8 +50,8 @@ class PageController {
     }
 
     public function __destruct() {
-
-        $this->tpl->draw("footer");
-
+        if ($this->options["footer"]) {
+            $this->tpl->draw("footer");
+        }
     }
 }
