@@ -3,9 +3,15 @@
 
     use \Rootdir\DB\Sql;
     use \Rootdir\Model as BaseModel;
+    use \Rootdir\Mailer;
 
     class User extends BaseModel {
         const SESSION = "user";
+        const SECRET = "HcodePhp7_Secret";
+        const SECRET_IV = "HcodePhp7_Secret_IV";
+        const ERROR = "UserError";
+        const ERROR_REGISTER = "UserErrorRegister";
+        const SUCCESS = "UserSucesss";
 
         /**
          * Realiza login do suauario
@@ -26,7 +32,7 @@
             }
 
             $data = $result[0];
-            
+
             // gera uma password hash
             // password_hash($password, PASSWORD_DEFAULT, ['cont' => 12]);
 
@@ -116,6 +122,75 @@
             self::select("CALL sp_users_delete(:iduser)",[
                 "iduser" => $this->getiduser()
             ]);
+        }
+
+        public static function getForgot(string $email) {
+            $result = self::select("SELECT * FROM tb_persons p INNER JOIN tb_users u USING(idpertson) WERE p.desemail = :email", ["email" => $email]);
+            if (count($result) === 0) {
+                throw new \Exception('Não foi possível recuperar a senha!');
+            } else {
+                $user = $result[0];
+                $result2 = self::select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", [
+                    "iduser" => $user["iduser"],
+                    "desip" => $_SERVER["REMOTE_ADDR"]
+                ]);
+                if (count($result2) === 0) {
+                    throw new \Exception('Não foi possível recuperar a senha!');
+                } else {
+                    $hashRecovery = $result2[0];
+                    $code = base64_encode(
+                        openssl_encrypt($hashRecovery["idrecovery"], "AES-128-CBC", pack("a16", User::SECRET), 0, pack("a16", User::SECRET_IV))
+                    );
+                    $link = "http://www.atanael.com.br/gestao/forgot/reset?code=$code";
+                    $mailer = new Mailer($user["desemail"], $user["desperson"], "Redefinir senha E-commerce", "forgot", [
+                        "name" => $user["desperson"],
+                        "link" => $link
+                    ]);
+                    $mailer->send();
+                    return $user;
+                }
+            }
+        }
+
+        public static function validForgotDecrypt($code)
+        {
+            $code = base64_decode($code);
+            $idrecovery = openssl_decrypt($code, 'AES-128-CBC', pack("a16", User::SECRET), 0, pack("a16", User::SECRET_IV));
+
+            $results = self::select("
+                SELECT *
+                FROM tb_userspasswordsrecoveries a
+                INNER JOIN tb_users b USING(iduser)
+                INNER JOIN tb_persons c USING(idperson)
+                WHERE
+                    a.idrecovery = :idrecovery
+                    AND
+                    a.dtrecovery IS NULL
+                    AND
+                    DATE_ADD(a.dtregister, INTERVAL 1 HOUR) >= NOW();
+                ", [":idrecovery"=>$idrecovery]
+            );
+
+            if (count($results) === 0) {
+                throw new \Exception("Não foi possível recuperar a senha.");
+            } else {
+                return $results[0];
+            }
+        }
+
+        public static function setFogotUsed($idrecovery) {
+            $sql = new Sql();
+            $sql->query("UPDATE tb_userspasswordsrecoveries SET dtrecovery = NOW() WHERE idrecovery = :idrecovery", array(
+                "idrecovery" => $idrecovery
+            ));
+        }
+
+        public function setPassword($password) {
+            $sql = new Sql();
+            $sql->query("UPDATE tb_users SET despassword = :password WHERE iduser = :iduser", array(
+                "password"=> self::encriptPassword($password),
+                "iduser"=> $this->getiduser()
+            ));
         }
 
         private static function select(string $query, array $bind = []) : array {
