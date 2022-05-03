@@ -230,6 +230,17 @@ $app->post('/gestao/categorias/:idcategory', function(string $idcategory) {
 	exit;
 });
 
+$app->get('/categorias/:idcategory', function($idcategory) {
+	$category = new Category();
+	$category->get((int)$idcategory);
+	$page = new PageController();
+	$page->setTpl("category", [
+		"category" => $category->expose(),
+		"products" => []
+	]);
+	exit;
+});
+
 // CLEARLOG
 $app->get('/clearlog', function() {
 	$page = new PageClearLogController([

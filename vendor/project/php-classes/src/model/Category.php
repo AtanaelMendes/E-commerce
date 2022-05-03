@@ -33,6 +33,7 @@
             self::select("Call category_delete(:idcategory)", [
                 "idcategory" => $this->getidcategory()
             ]);
+            self::updateFile();
         }
 
         public static function updateFile() {
@@ -40,10 +41,12 @@
             $html = [];
 
             foreach ($categories as $row) {
-                array_push($html, '<li><a href="/categories/'.$row['idcategory'].'">'.$row['descategory'].'</a></li>');
+                $html[] = '<li><a href="/categorias/'.$row['idcategory'].'">'.$row['descategory'].'</a></li>';
             }
 
-            file_put_contents($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "categories-menu.html", implode('', $html));
+            file_put_contents(
+                $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "categories-menu.html", implode(' ', $html)
+            );
         }
 
         private static function select(string $query, array $bind = []) : array {
