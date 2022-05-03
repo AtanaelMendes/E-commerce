@@ -119,7 +119,7 @@
         }
 
         public function delete() {
-            self::select("CALL sp_users_delete(:iduser)",[
+            self::select("CALL sp_users_delete(:iduser)", [
                 "iduser" => $this->getiduser()
             ]);
         }

@@ -6,6 +6,7 @@ use \Rootdir\PageController;
 use \Rootdir\PageAdminController;
 use \Rootdir\PageClearLogController;
 use \Rootdir\Model\User;
+use \Rootdir\Model\Category;
 
 require_once("vendor/autoload.php");
 
@@ -129,7 +130,7 @@ $app->post('/gestao/forgot', function() {
 });
 
 // recuperação email enviada
-$app->get('/admin/forgot/sent', function() {
+$app->get('/gestao/forgot/sent', function() {
 	$page = new PageAdminController([
 		"header" => false,
 		"footer" => false
@@ -139,7 +140,7 @@ $app->get('/admin/forgot/sent', function() {
 });
 
 // tela de rset de senha
-$app->get('/admin/forgot/reset', function() {
+$app->get('/gestao/forgot/reset', function() {
 	$user = USer::validForgotDecrypt($_POST["code"]);
 	$page = new PageAdminController([
 		"header" => false,
@@ -153,7 +154,7 @@ $app->get('/admin/forgot/reset', function() {
 });
 
 // POST tela de rset de senha
-$app->get('/admin/forgot/reset', function() {
+$app->get('/gestao/forgot/reset', function() {
 	$forgot = USer::validForgotDecrypt($_POST["code"]);
 	User::setFogotUsed($forgot["idrecovery"]);
 	$user = new User();
@@ -164,6 +165,68 @@ $app->get('/admin/forgot/reset', function() {
 		"footer" => false
 	]);
 	$page->setTpl("forgot-reset-success");
+	exit;
+});
+
+// tela lista categoria
+$app->get('/gestao/categorias', function() {
+	User::verifyLogin();
+	$category = Category::listAll();
+	$page = new PageAdminController();
+	$page->setTpl("categories", [
+		"categories" => $category
+	]);
+	exit;
+});
+
+//tela cadastro categoria
+$app->get('/gestao/categorias/create', function() {
+	User::verifyLogin();
+	$page = new PageAdminController();
+	$page->setTpl("categories-create");
+	exit;
+});
+
+//POST tela cadastro categoria
+$app->post('/gestao/categorias/create', function() {
+	User::verifyLogin();
+	$category = new Category();
+	$category->setData($_POST);
+	$category->save();
+	header("Location: /gestao/categorias");
+	exit;
+});
+
+//POST tela cadastro categoria
+$app->get('/gestao/categorias/:idcategory/delete', function(string $idcategory) {
+	User::verifyLogin();
+	$category = new Category();
+	$category->get((int)$idcategory);
+	$category->delete();
+	header("Location: /gestao/categorias");
+	exit;
+});
+
+//tela atualiza categoria
+$app->get('/gestao/categorias/:idcategory', function(string $idcategory) {
+	User::verifyLogin();
+	$page = new PageAdminController();
+	$category = new Category();
+	$category->get((int)$idcategory);
+	$page->setTpl("categories-update", [
+		"category" => $category->expose()
+	]);
+	exit;
+});
+
+//POST tela atualiza categoria
+$app->post('/gestao/categorias/:idcategory', function(string $idcategory) {
+	User::verifyLogin();
+	$category = new Category();
+	$category->get((int)$idcategory);
+	$category->setData($_POST);
+	$category->save($_POST);
+	header("Location: /gestao/categorias");
 	exit;
 });
 

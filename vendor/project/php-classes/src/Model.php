@@ -10,7 +10,7 @@
             
             switch ($method) {
                 case 'get':
-                    return $this->values[$fieldName];
+                    return $this->values[$fieldName] ?? null;
                     break;
                 case 'set':
                     return $this->values[$fieldName] = $args[0];
