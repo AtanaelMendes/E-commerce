@@ -2,11 +2,16 @@
 use \Rootdir\PageController;
 use \Rootdir\PageClearLogController;
 use \Rootdir\Model\Category;
+use Rootdir\Model\Product;
 
 // site
 $app->get('/', function() {
+	$produtos = Product::listAll();
+
 	$page = new PageController();
-	$page->setTpl("index");
+	$page->setTpl("index", [
+		"products" => Product::checkList($produtos)
+	]);
 	exit;
 });
 

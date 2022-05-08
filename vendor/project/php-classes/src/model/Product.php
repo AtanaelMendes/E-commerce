@@ -10,6 +10,16 @@
             return self::select("SELECT * FROM tb_products ORDER BY desproduct");
         }
 
+        public static function checkList($list) {
+            foreach ($list as &$row) {
+                $p = new Product();
+                $p->setData($row);
+                $row = $p->expose();
+            }
+
+            return $list;
+        }
+
         public function save() {
             $result = self::select(
                 "CALL sp_products_save(
@@ -64,9 +74,22 @@
         }
 
         public function addPhoto($photo) {
+
+            error_log(print_r(basename(__FILE__)." DEBUGGER linha-> ".__LINE__, true));
+            error_log(print_r($photo, true));
+            error_log(print_r(basename(__FILE__)." DEBUGGER linha-> ".__LINE__, true));
+
             $extension = explode(".", $photo["name"]);
             $extension = end($extension);
             $img = "";
+
+            error_log(print_r(basename(__FILE__)." DEBUGGER linha-> ".__LINE__, true));
+            error_log(print_r($extension, true));
+            error_log(print_r(basename(__FILE__)." DEBUGGER linha-> ".__LINE__, true));
+
+            if (empty($extension)) {
+                $this->checkPhoto();
+            }
 
             switch ($extension) {
                 case 'jpg':
@@ -81,11 +104,13 @@
                     break;
             }
 
+            
+
             $newImg = self::getFullPath().$this->getidproduct().".jpg";
 
             imagejpeg($img, $newImg);
 
-            // imagedestroy($img);
+            imagedestroy($img);
 
             $this->checkPhoto();
         }
