@@ -3,7 +3,6 @@
 
     use \Rootdir\DB\Sql;
     use \Rootdir\Model as BaseModel;
-    use \Rootdir\Mailer;
 
     class Category extends BaseModel {
 
@@ -49,8 +48,53 @@
             );
         }
 
+        public function getProducts(bool $related = true) {
+            $condition =  ($related ? " IN " : " NOT IN ");
+
+            return self::select("
+                SELECT  *
+                FROM    tb_products
+                WHERE   idproduct $condition (
+                    SELECT  p.idproduct
+                    FROM    tb_products p
+                            INNER JOIN tb_productscategories pc
+                            USING(idproduct)
+                    WHERE   pc.idcategory = :idcategory
+                )",
+                ["idcategory" => $this->getidcategory()]
+            );
+        }
+
+        public function addProduct(Product $product) {
+            self::query("
+                INSERT INTO tb_productscategories (idcategory, idproduct)
+                VALUES (:idcategory, :idproduct)",
+                [
+                    "idcategory" => $this->getidcategory(),
+                    "idproduct" => $product->getidproduct()
+                ]
+            );
+        }
+
+        public function removeProduct(Product $product) {
+            self::query("
+                DELETE  FROM tb_productscategories
+                WHERE   idcategory = :idcategory
+                AND     idproduct = :idproduct",
+                [
+                    "idcategory" => $this->getidcategory(),
+                    "idproduct" => $product->getidproduct()
+                ]
+            );
+        }
+
         private static function select(string $query, array $bind = []) : array {
             $DAO = new Sql();
             return $DAO->select($query, $bind);
+        }
+
+        private static function query(string $query, array $bind = []) : void {
+            $DAO = new Sql();
+            $DAO->query($query, $bind);
         }
     }

@@ -32,7 +32,7 @@ $app->get('/categorias/:idcategory', function($idcategory) {
 	$page = new PageController();
 	$page->setTpl("category", [
 		"category" => $category->expose(),
-		"products" => []
+		"products" => Product::checkList($category->getProducts())
 	]);
 	exit;
 });

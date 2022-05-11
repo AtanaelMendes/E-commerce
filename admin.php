@@ -1,7 +1,7 @@
 <?php
 use \Rootdir\PageAdminController;
 use \Rootdir\Model\User;
-use \Rootdir\Model\Category;
+
 
 // gestao
 $app->get('/gestao', function() {
@@ -95,64 +95,3 @@ $app->post('/gestao/users/:iduser', function(string $iduser) {
 	exit;
 });
 
-// tela lista categoria
-$app->get('/gestao/categorias', function() {
-	User::verifyLogin();
-	$category = Category::listAll();
-	$page = new PageAdminController();
-	$page->setTpl("categories", [
-		"categories" => $category
-	]);
-	exit;
-});
-
-//tela cadastro categoria
-$app->get('/gestao/categorias/create', function() {
-	User::verifyLogin();
-	$page = new PageAdminController();
-	$page->setTpl("categories-create");
-	exit;
-});
-
-//POST tela cadastro categoria
-$app->post('/gestao/categorias/create', function() {
-	User::verifyLogin();
-	$category = new Category();
-	$category->setData($_POST);
-	$category->save();
-	header("Location: /gestao/categorias");
-	exit;
-});
-
-//POST tela cadastro categoria
-$app->get('/gestao/categorias/:idcategory/delete', function(string $idcategory) {
-	User::verifyLogin();
-	$category = new Category();
-	$category->get((int)$idcategory);
-	$category->delete();
-	header("Location: /gestao/categorias");
-	exit;
-});
-
-//tela atualiza categoria
-$app->get('/gestao/categorias/:idcategory', function(string $idcategory) {
-	User::verifyLogin();
-	$page = new PageAdminController();
-	$category = new Category();
-	$category->get((int)$idcategory);
-	$page->setTpl("categories-update", [
-		"category" => $category->expose()
-	]);
-	exit;
-});
-
-//POST tela atualiza categoria
-$app->post('/gestao/categorias/:idcategory', function(string $idcategory) {
-	User::verifyLogin();
-	$category = new Category();
-	$category->get((int)$idcategory);
-	$category->setData($_POST);
-	$category->save($_POST);
-	header("Location: /gestao/categorias");
-	exit;
-});
