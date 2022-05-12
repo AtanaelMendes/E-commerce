@@ -88,6 +88,26 @@
             );
         }
 
+        public function getPagination(int $page = 1, int $pageItems = 3) {
+            $start = ($page - 1) * $pageItems;
+            $result = self::select("
+                SELECT  SQL_CALC_FOUND_ROWS *
+                FROM    tb_products a
+                        INNER JOIN tb_productscategories b USING(idproduct)
+                        INNER JOIN tb_categories c USING(idcategory)
+                WHERE   c.idcategory = :idcategory
+                LIMIT $start, $pageItems", [
+                    "idcategory" => $this->getidcategory()
+                ]
+            );
+            $resultTotal = self::select("SELECT FOUND_ROWS() AS nrtotal");
+            return [
+                "data" => Product::checkList($result),
+                "total" => (int)$resultTotal[0]["nrtotal"],
+                "pages" => ceil($resultTotal[0]["nrtotal"] / $pageItems)
+            ];
+        }
+
         private static function select(string $query, array $bind = []) : array {
             $DAO = new Sql();
             return $DAO->select($query, $bind);
