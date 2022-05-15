@@ -27,4 +27,15 @@
         public function expose() {
             return $this->values;
         }
+
+        public function dd($content) {
+            header('Content-Type: application/json');
+            if (is_array($content)) {
+                echo json_encode($content, JSON_PRETTY_PRINT);
+                die;
+            }
+
+            echo json_encode([0 => $content], JSON_PRETTY_PRINT);
+            die;
+        }
     }

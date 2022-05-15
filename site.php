@@ -27,23 +27,14 @@ $app->get('/clearlog', function() {
 
 // site categoria
 $app->get('/categorias/:idcategory', function($idcategory) {
-	$page = (isset($_GET['page']) ? (int)$_GET['page'] : 1);
 	$category = new Category();
 	$category->get((int)$idcategory);
-	$pagination = $category->getPagination();
+	$pagination = $category->getPagination((isset($_GET['page']) ? $_GET['page'] : 1));
 	$page = new PageController();
-	$pages = [];
-
-	for ($pg=0; $pg <= $pagination["pages"]; $pg++) {
-		array_push($pages, [
-			"link" => "/categorias/".$category->getidcategory()."?page=".$pg,
-			"page" => $pg
-		]);
-	}
 	$page->setTpl("category", [
 		"category" => $category->expose(),
 		"products" => $pagination["data"],
-		"pages" => $pages
+		"pages" => $pagination["pages"]
 	]);
 	exit;
 });

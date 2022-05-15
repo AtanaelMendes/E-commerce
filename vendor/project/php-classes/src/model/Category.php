@@ -89,22 +89,37 @@
         }
 
         public function getPagination(int $page = 1, int $pageItems = 3) {
-            $start = ($page - 1) * $pageItems;
+            $start = (($page - 1) * $pageItems);
+
             $result = self::select("
-                SELECT  SQL_CALC_FOUND_ROWS *
+                SELECT  a.*,
+                        temptb.qtreg
                 FROM    tb_products a
                         INNER JOIN tb_productscategories b USING(idproduct)
                         INNER JOIN tb_categories c USING(idcategory)
-                WHERE   c.idcategory = :idcategory
+                        LEFT outer JOIN (
+                            SELECT 	count(*) as qtreg, idcategory
+                            FROM 	tb_productscategories bb
+                            where idcategory = :idcategory1
+                        ) temptb on (1=1)
+                WHERE   c.idcategory = :idcategory2
                 LIMIT $start, $pageItems", [
-                    "idcategory" => $this->getidcategory()
+                    "idcategory1" => $this->getidcategory(),
+                    "idcategory2" => $this->getidcategory()
                 ]
             );
-            $resultTotal = self::select("SELECT FOUND_ROWS() AS nrtotal");
+
+            $pages = [];
+            for ($pg=1; $pg <= ceil($result[0]["qtreg"] / $pageItems); $pg++) {
+                array_push($pages, [
+                    "link" => "/categorias/".$this->getidcategory()."?page=".$pg,
+                    "page" => $pg
+                ]);
+            }
+
             return [
                 "data" => Product::checkList($result),
-                "total" => (int)$resultTotal[0]["nrtotal"],
-                "pages" => ceil($resultTotal[0]["nrtotal"] / $pageItems)
+                "pages" => $pages
             ];
         }
 
