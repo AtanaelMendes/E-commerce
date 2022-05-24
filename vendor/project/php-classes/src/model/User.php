@@ -13,6 +13,23 @@
         const ERROR_REGISTER = "UserErrorRegister";
         const SUCCESS = "UserSucesss";
 
+        public static function getFromSession() {
+            $user = new User();
+            if (isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]["iduser"] > 0) {
+                $user->setData($_SESSION[User::SESSION]);
+            }
+            return $user;
+        }
+
+        /**
+         * se true está logado, false não
+         *
+         * @return boolean
+         */
+        public static function checkLogin() :bool {
+            return (!empty($_SESSION[User::SESSION]) || (int)$_SESSION[User::SESSION]["iduser"] > 0);
+        }
+
         /**
          * Realiza login do suauario
          *
@@ -55,11 +72,7 @@
          * @return void
          */
         public static function verifyLogin(bool $isAdmin = true) {
-            if (
-                empty($_SESSION[User::SESSION])
-                || !(int)$_SESSION[User::SESSION]["iduser"] > 0
-                || !(bool)$_SESSION[User::SESSION]["inadmin"] === $isAdmin
-                ) {
+            if (!self::checkLogin() || !(bool)$_SESSION[User::SESSION]["inadmin"] === $isAdmin) {
                 header("Location: /gestao/login");
                 exit;
             }

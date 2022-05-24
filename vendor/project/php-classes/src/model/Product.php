@@ -75,17 +75,9 @@
 
         public function addPhoto($photo) {
 
-            error_log(print_r(basename(__FILE__)." DEBUGGER linha-> ".__LINE__, true));
-            error_log(print_r($photo, true));
-            error_log(print_r(basename(__FILE__)." DEBUGGER linha-> ".__LINE__, true));
-
             $extension = explode(".", $photo["name"]);
             $extension = end($extension);
             $img = "";
-
-            error_log(print_r(basename(__FILE__)." DEBUGGER linha-> ".__LINE__, true));
-            error_log(print_r($extension, true));
-            error_log(print_r(basename(__FILE__)." DEBUGGER linha-> ".__LINE__, true));
 
             if (empty($extension)) {
                 $this->checkPhoto();
@@ -134,6 +126,21 @@
             $this->checkPhoto();
             $values = parent::expose();
             return $values;
+        }
+
+        public function getFromURL($desurl) {
+            $result = self::select("SELECT * FROM tb_products WHERE desurl = :desurl", [
+                "desurl" => $desurl
+            ]);
+
+            $this->setData($result[0]);
+        }
+
+        public function getCategories() {
+            return self::select(
+                "SELECT * FROM tb_categories a INNER JOIN tb_productscategories b USING(idcategory) WHERE b.idproduct = :idproduct", [
+                "idproduct" => $this->getidproduct()
+            ]);
         }
 
         public static function getFullPath() {
