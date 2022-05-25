@@ -52,7 +52,7 @@ $app->get('/cart', function(){
 	]);
 });
 
-// adicionar um produto do carrinho
+// adicionar produto do carrinho
 $app->get("/cart/:idproduct/add", function($idproduct){
 	$product = new Product();
 	$product->get((int)$idproduct);
@@ -81,6 +81,14 @@ $app->get('/cart/:idproduct/remove', function($idproduct) {
 	$produto->get((int)$idproduct);
 	$cart = Cart::getFromSession();
 	$cart->removeProd($produto, true);
+	header("Location: /cart");
+	exit;
+});
+
+// Calculo de frete
+$app->post('/cart/freight', function() {
+	$cart = Cart::getFromSession();
+	$cart->setFreight($_POST["zipcode"]);
 	header("Location: /cart");
 	exit;
 });
