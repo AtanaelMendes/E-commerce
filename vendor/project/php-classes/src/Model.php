@@ -31,11 +31,12 @@
         public function dd($content) {
             header('Content-Type: application/json');
             if (is_array($content)) {
+                array_unshift($content, debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
                 echo json_encode($content, JSON_PRETTY_PRINT);
                 die;
             }
 
-            echo json_encode([0 => $content], JSON_PRETTY_PRINT);
+            echo json_encode([debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), $content], JSON_PRETTY_PRINT);
             die;
         }
     }

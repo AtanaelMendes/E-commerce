@@ -16,16 +16,6 @@ $app->get('/', function() {
 	exit;
 });
 
-// CLEARLOG
-$app->get('/clearlog', function() {
-	$page = new PageClearLogController([
-		"header" => false,
-		"footer" => false
-	]);
-	$page->setTpl("index");
-	exit;
-});
-
 // site categoria
 $app->get('/categorias/:idcategory', function($idcategory) {
 	$category = new Category();
@@ -60,6 +50,19 @@ $app->get('/cart', function(){
 		"cart" => $cart->expose(),
 		"products" => $cart->getProducts()
 	]);
+});
+
+// adicionar um produto do carrinho
+$app->get("/cart/:idproduct/add", function($idproduct){
+	$product = new Product();
+	$product->get((int)$idproduct);
+	$cart = Cart::getFromSession();
+	$qtd = (isset($_GET['qtd'])) ? (int)$_GET['qtd'] : 1;
+	for ($i = 0; $i < $qtd; $i++) {
+		$cart->addProduct($product);
+	}
+	header("Location: /cart");
+	exit;
 });
 
 // remover um produto do carrinho

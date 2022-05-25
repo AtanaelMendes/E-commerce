@@ -49,7 +49,6 @@
             $result = self::select("SELECT * FROM tb_products WHERE idproduct = :idproduct", [
                 "idproduct" => $idproduct
             ]);
-
             $this->setData($result[0]);
         }
 

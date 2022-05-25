@@ -71,7 +71,7 @@ class Cart extends BaseModel {
     }
 
     public function addProduct(Product $produto) {
-        self::query("INSERT INTO tb_cartsproducts(idcart, idproduct) VALUES(:idcart, :idproduct)". [
+        self::query("INSERT INTO tb_cartsproducts(idcart, idproduct) VALUES(:idcart, :idproduct)", [
             "idcart" => $this->getidcart(),
             "idproduct" => $produto->getidproduct()
         ]);
@@ -102,7 +102,7 @@ class Cart extends BaseModel {
                         b.vllength       ,
                         b.vlweight       ,
                         b.desurl         ,
-                        COUNT(*) AS nrqtd,
+                        COUNT(*) AS qtprod,
                         SUM(b.vlprice) AS vltotal
 			FROM        tb_cartsproducts a
 			            INNER JOIN tb_products b
