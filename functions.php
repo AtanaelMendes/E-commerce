@@ -12,5 +12,5 @@ function checkLogin(bool $isadmin = true) :bool {
 
 function getUserName() : ?string {
     $user = User::getFromSession();
-    return $user->getdeslogin();
+    return $user->getdesperson();
 }

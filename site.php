@@ -149,7 +149,7 @@ $app->post("/register", function() {
 	$user->setData([
 		"inadmin" => 0,
 		"deslogin" => $_POST["email"],
-		"desperson" => utf8_decode($_POST["name"]),
+		"desperson" => $_POST["name"],
 		"desemail" => $_POST["email"],
 		"despassword" => $_POST["password"],
 		"nrphone" => $_POST["phone"]
@@ -206,6 +206,33 @@ $app->get('/forgot/reset', function() {
 	$user->setPassword($_POST["password"]);
 	$page = new PageController();
 	$page->setTpl("forgot-reset-success");
+	exit;
+});
+
+// meu perfil
+$app->get("/profile", function() {
+	User::verifyLogin(false);
+	$user = User::getFromSession();
+	$page = new PageController();
+	$page->setTpl("profile",[
+		"user" => $user->expose(),
+		"profileError" => User::getMsgError(),
+		"profileMsg" => User::getSuccess()
+	]);
+});
+
+// POST edicao perfil
+$app->post("/profile", function() {
+	$user = User::getFromSession();
+	User::verifyLogin(false);
+	User::verifyRequestEditProfile($_POST, $user);
+	$_POST["inadmin"] = $user->getinadmin();
+	$_POST["despassword"] = $user->getdespassword();
+	$_POST["deslogin"] = $_POST["desemail"];
+	$user->setData($_POST);
+	$user->update();
+	User::setSuccess("Dados alterados com sucesso!");
+	header("Location: /profile");
 	exit;
 });
 

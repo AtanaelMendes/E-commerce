@@ -48,7 +48,9 @@
         public static function login(string $login, string $password)
         {
             $result = self::select(
-                "SELECT * FROM tb_users WHERE deslogin = :login",
+                "SELECT usr.*, per.*
+                FROM    tb_users usr
+                        INNER JOIN tb_persons per USING (idperson) WHERE usr.deslogin = :login",
                 ["login" => $login]
             );
 
@@ -65,8 +67,6 @@
                 $user = new User();
                 $user->setData($data);
                 $_SESSION[User::SESSION] = $user->expose();
-                // var_dump(json_encode($user->expose()));
-                // exit;
                 return $user;
             } else {
                 throw new \Exception('Usuário não existe ou senha inválida');
@@ -96,7 +96,7 @@
 
         public static function listAll() {
             return self::select(
-                "SELECT *
+                "SELECT usr.*, per.*
                 FROM    tb_users usr
                         INNER JOIN tb_persons per USING (idperson) ORDER BY per.desperson"
             );
@@ -249,6 +249,20 @@
             $_SESSION[self::ERROR_REGISTER] = null;
         }
 
+        public static function setSuccess($msg) {
+            $_SESSION[self::SUCCESS] = $msg;
+        }
+
+        public static function getSuccess() :string {
+            $msg =  (!empty($_SESSION[self::SUCCESS]) ? $_SESSION[self::SUCCESS] : "");
+            self::clearSuccess();
+            return $msg;
+        }
+
+        public static function clearSuccess() {
+            $_SESSION[self::SUCCESS] = null;
+        }
+
         public static function checkLoginExist(string $login) :bool {
             $results = self::select("SELECT * FROM tb_users WHERE deslogin = :deslogin", [
                 ':deslogin'=>$login
@@ -284,6 +298,28 @@
                 User::setMsgErrorRegister("Senha é obrigatorio, mínimo de 6 caracteres");
                 header("Location: /login");
                 exit;
+            }
+        }
+
+        public static function verifyRequestEditProfile(array $request, User $user) {
+            if (empty($request["desperson"]) || strlen($request["desperson"]) < 3) {
+                User::setMsgError("Nome é obrigatorio e mínimo 3 letras");
+                header("Location: /profile");
+                exit;
+            }
+            $emailRegex = "/^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z])+?$/i";
+            $isemail = preg_match($emailRegex, $request["desemail"]);
+            if (empty($request["desemail"]) || !$isemail) {
+                User::setMsgError("O E_mail é obrigatorio");
+                header("Location: /profile");
+                exit;
+            }
+            if ($request["desemail"] !== $user->getdesemail()) {
+                if (User::checkLoginExist($request["desemail"])) {
+                    User::setMsgError("Este E-mail já está em uso");
+                    header("Location: /profile");
+                    exit;
+                }
             }
         }
 
