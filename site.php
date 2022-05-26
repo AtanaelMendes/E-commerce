@@ -1,9 +1,10 @@
 <?php
 use \Rootdir\PageController;
-use \Rootdir\PageClearLogController;
 use \Rootdir\Model\Category;
 use Rootdir\Model\Product;
 use \Rootdir\Model\Cart;
+use \Rootdir\Model\User;
+use \Rootdir\Model\Address;
 
 // site
 $app->get('/', function() {
@@ -92,3 +93,50 @@ $app->post('/cart/freight', function() {
 	header("Location: /cart");
 	exit;
 });
+
+// finalizar compra
+$app->get("/checkout", function() {
+	User::verifyLogin(false);
+	$cart = Cart::getFromSession();
+	$address = new Address();
+	$page = new PageController();
+	$page->setTpl("checkout", [
+		"cart" => $cart->expose(),
+		"address" => $address->expose()
+	]);
+
+});
+
+// login de usuário
+$app->get("/login", function() {
+	$page = new PageController();
+	$page->setTpl("login", [
+		"error" => User::getMsgError()
+	]);
+
+});
+
+// rota de login
+$app->post("/login", function() {
+	try {
+		User::login($_POST["login"], $_POST["password"]);
+	} catch (\Exception $e) {
+		User::setMsgError($e->getMessage());
+	}
+	header("Location: /checkout");
+	exit;
+});
+
+$app->get("/logout", function() {
+	User::logout();
+	header("Location: /login");
+	exit;
+});
+
+// $app->post("", function() {
+
+// });
+
+// $app->get("", function() {
+
+// });

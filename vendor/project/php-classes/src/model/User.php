@@ -12,6 +12,7 @@
         const ERROR = "UserError";
         const ERROR_REGISTER = "UserErrorRegister";
         const SUCCESS = "UserSucesss";
+        const SESSION_ERROR = "UserError";
 
         public static function getFromSession() {
             $user = new User();
@@ -24,10 +25,18 @@
         /**
          * se true está logado, false não
          *
+         * @param bool $isAdmin
          * @return boolean
          */
-        public static function checkLogin() :bool {
-            return (!empty($_SESSION[User::SESSION]) || (int)$_SESSION[User::SESSION]["iduser"] > 0);
+        public static function checkLogin(bool $isAdmin = true) :bool {
+            if ($isAdmin) {
+                return (
+                    !empty($_SESSION[self::SESSION])
+                    && (int)$_SESSION[self::SESSION]["iduser"] > 0
+                    && (bool)$_SESSION[User::SESSION]["inadmin"]
+                );
+            }
+            return (!empty($_SESSION[self::SESSION]) && (int)$_SESSION[self::SESSION]["iduser"] > 0);
         }
 
         /**
@@ -72,8 +81,12 @@
          * @return void
          */
         public static function verifyLogin(bool $isAdmin = true) {
-            if (!self::checkLogin() || !(bool)$_SESSION[User::SESSION]["inadmin"] === $isAdmin) {
-                header("Location: /gestao/login");
+            if (!self::checkLogin($isAdmin)) {
+                if ($isAdmin) {
+                    header("Location: /gestao/login");
+                } else {
+                    header("Location: /login");
+                }
                 exit;
             }
         }
@@ -93,8 +106,8 @@
         public function save() {
             $result = self::select(
                 "CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", [
-                "desperson" => $this->getdesperson(),
-                "deslogin" => $this->getdeslogin(),
+                "desperson" => utf8_decode($this->getdesperson()),
+                "deslogin" => utf8_decode($this->getdeslogin()),
                 "despassword" => self::encriptPassword($this->getdespassword()),
                 "desemail" => $this->getdesemail(),
                 "nrphone" => $this->getnrphone(),
@@ -108,8 +121,8 @@
             $result = self::select(
                 "CALL sp_usersupdate_save(:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", [
                 "iduser" => $this->getiduser(),
-                "desperson" => $this->getdesperson(),
-                "deslogin" => $this->getdeslogin(),
+                "desperson" => utf8_decode($this->getdesperson()),
+                "deslogin" => utf8_decode($this->getdeslogin()),
                 "despassword" => self::encriptPassword($this->getdespassword()),
                 "desemail" => $this->getdesemail(),
                 "nrphone" => $this->getnrphone(),
@@ -204,6 +217,20 @@
                 "password"=> self::encriptPassword($password),
                 "iduser"=> $this->getiduser()
             ));
+        }
+
+        public static function setMsgError($msg) {
+            $_SESSION[self::SESSION_ERROR] = $msg;
+        }
+    
+        public static function getMsgError() {
+            $msg =  (!empty($_SESSION[self::SESSION_ERROR]) ? $_SESSION[self::SESSION_ERROR] : "");
+            self::clearMsgError();
+            return $msg;
+        }
+    
+        public static function clearMsgError() {
+            $_SESSION[self::SESSION_ERROR] = null;
         }
 
         private static function select(string $query, array $bind = []) : array {

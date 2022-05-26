@@ -28,7 +28,7 @@
             return $this->values;
         }
 
-        public function dd($content) {
+        public static function dd($content) {
             header('Content-Type: application/json');
             if (is_array($content)) {
                 array_unshift($content, debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
