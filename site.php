@@ -102,7 +102,8 @@ $app->get("/checkout", function() {
 	$page = new PageController();
 	$page->setTpl("checkout", [
 		"cart" => $cart->expose(),
-		"address" => $address->expose()
+		"address" => $address->expose(),
+		"error" => ""
 	]);
 
 });
@@ -111,7 +112,13 @@ $app->get("/checkout", function() {
 $app->get("/login", function() {
 	$page = new PageController();
 	$page->setTpl("login", [
-		"error" => User::getMsgError()
+		"error" => User::getMsgError(),
+		"errorRegister" => User::getMsgErrorRegister(),
+		"registerValues" => (isset($_SESSION["registerValues"]) ? $_SESSION["registerValues"] : [
+			"name" => "",
+			"email" => "",
+			"phone" => ""
+		])
 	]);
 
 });
@@ -127,9 +134,52 @@ $app->post("/login", function() {
 	exit;
 });
 
+// logout
 $app->get("/logout", function() {
 	User::logout();
 	header("Location: /login");
+	exit;
+});
+
+// cadastro usuário comum
+$app->post("/register", function() {
+	$_SESSION["registerValues"] = $_POST;
+	if (empty($_POST["name"])  || strlen($_POST["name"]) < 3) {
+		User::setMsgErrorRegister("Nome é obrigatorio e mínimo de 3 letras");
+		header("Location: /login");
+		exit;
+	}
+	$emailRegex = "/^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z])+?$/i";
+	$isemail = preg_match($emailRegex, $_POST["email"]);
+	if (empty($_POST["email"])  || !$isemail) {
+		User::setMsgErrorRegister("Informe um E-mail válido");
+		header("Location: /login");
+		exit;
+	}
+	if (User::checkLoginExist($_POST["email"])) {
+		User::setMsgErrorRegister("Este E-mail já está em uso");
+		header("Location: /login");
+		exit;
+	}
+	if (empty($_POST["password"])  || strlen($_POST["password"]) < 6) {
+		User::setMsgErrorRegister("Senha é obrigatorio, mínimo de 6 caracteres");
+		header("Location: /login");
+		exit;
+	}
+	$user = new User();
+	$user->setData([
+		"inadmin" => 0,
+		"deslogin" => $_POST["email"],
+		"desperson" => utf8_decode($_POST["name"]),
+		"desemail" => $_POST["email"],
+		"despassword" => $_POST["password"],
+		"nrphone" => $_POST["phone"]
+	]);
+
+	$user->save();
+
+	User::login($_POST["email"], $_POST["password"]);
+	header("Location: /checkout");
 	exit;
 });
 

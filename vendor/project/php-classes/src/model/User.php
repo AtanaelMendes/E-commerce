@@ -12,7 +12,6 @@
         const ERROR = "UserError";
         const ERROR_REGISTER = "UserErrorRegister";
         const SUCCESS = "UserSucesss";
-        const SESSION_ERROR = "UserError";
 
         public static function getFromSession() {
             $user = new User();
@@ -220,17 +219,38 @@
         }
 
         public static function setMsgError($msg) {
-            $_SESSION[self::SESSION_ERROR] = $msg;
+            $_SESSION[self::ERROR] = $msg;
         }
-    
-        public static function getMsgError() {
-            $msg =  (!empty($_SESSION[self::SESSION_ERROR]) ? $_SESSION[self::SESSION_ERROR] : "");
+
+        public static function getMsgError() :string {
+            $msg =  (!empty($_SESSION[self::ERROR]) ? $_SESSION[self::ERROR] : "");
             self::clearMsgError();
             return $msg;
         }
-    
+
         public static function clearMsgError() {
-            $_SESSION[self::SESSION_ERROR] = null;
+            $_SESSION[self::ERROR] = null;
+        }
+
+        public static function setMsgErrorRegister($msg) {
+            $_SESSION[self::ERROR_REGISTER] = $msg;
+        }
+
+        public static function getMsgErrorRegister() :string {
+            $msg =  (!empty($_SESSION[self::ERROR_REGISTER]) ? $_SESSION[self::ERROR_REGISTER] : "");
+            self::clearMsgErrorRegister();
+            return $msg;
+        }
+
+        public static function clearMsgErrorRegister() {
+            $_SESSION[self::ERROR_REGISTER] = null;
+        }
+
+        public static function checkLoginExist(string $login) :bool {
+            $results = self::select("SELECT * FROM tb_users WHERE deslogin = :deslogin", [
+                ':deslogin'=>$login
+            ]);
+            return (count($results) > 0);
         }
 
         private static function select(string $query, array $bind = []) : array {
