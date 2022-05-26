@@ -144,28 +144,7 @@ $app->get("/logout", function() {
 // cadastro usuário comum
 $app->post("/register", function() {
 	$_SESSION["registerValues"] = $_POST;
-	if (empty($_POST["name"])  || strlen($_POST["name"]) < 3) {
-		User::setMsgErrorRegister("Nome é obrigatorio e mínimo de 3 letras");
-		header("Location: /login");
-		exit;
-	}
-	$emailRegex = "/^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z])+?$/i";
-	$isemail = preg_match($emailRegex, $_POST["email"]);
-	if (empty($_POST["email"])  || !$isemail) {
-		User::setMsgErrorRegister("Informe um E-mail válido");
-		header("Location: /login");
-		exit;
-	}
-	if (User::checkLoginExist($_POST["email"])) {
-		User::setMsgErrorRegister("Este E-mail já está em uso");
-		header("Location: /login");
-		exit;
-	}
-	if (empty($_POST["password"])  || strlen($_POST["password"]) < 6) {
-		User::setMsgErrorRegister("Senha é obrigatorio, mínimo de 6 caracteres");
-		header("Location: /login");
-		exit;
-	}
+	User::verifyRequestCad($_POST);
 	$user = new User();
 	$user->setData([
 		"inadmin" => 0,
@@ -178,8 +157,55 @@ $app->post("/register", function() {
 
 	$user->save();
 
+	$_SESSION["registerValues"] = [
+		"name" => "",
+		"email" => "",
+		"phone" => ""
+	];
+
 	User::login($_POST["email"], $_POST["password"]);
 	header("Location: /checkout");
+	exit;
+});
+
+// tela esqueceu a senha
+$app->get('/forgot', function() {
+	$page = new PageController();
+	$page->setTpl("forgot");
+	exit;
+});
+
+// POST tela esqueceu a senha
+$app->post('/forgot', function() {
+	User::getForgot($_POST["email"], false);
+	header("Location: /forgot/sent");
+	exit;
+});
+
+// recuperação email enviada
+$app->get('/forgot/sent', function() {
+	$page = new PageController();
+	$page->setTpl("forgot-sent");
+	exit;
+});
+
+// tela de rset de senha
+$app->get('/forgot/reset', function() {
+	$user = USer::validForgotDecrypt($_POST["code"]);
+	$page = new PageController();
+	$page->setTpl("forgot-reset");
+	exit;
+});
+
+// POST tela de rset de senha
+$app->get('/forgot/reset', function() {
+	$forgot = USer::validForgotDecrypt($_POST["code"]);
+	User::setFogotUsed($forgot["idrecovery"]);
+	$user = new User();
+	$user->get((int)$forgot("iduser"));
+	$user->setPassword($_POST["password"]);
+	$page = new PageController();
+	$page->setTpl("forgot-reset-success");
 	exit;
 });
 

@@ -1,8 +1,9 @@
 <?php
 use \Rootdir\Model\User;
 
-function formatNumber(float $number) {
-    return number_format($number, 2, ",", ".");
+function formatNumber($number) {
+    $valpice = ($number > 0 ? $number : 0);
+    return number_format($valpice, 2, ",", ".");
 }
 
 function checkLogin(bool $isadmin = true) :bool {

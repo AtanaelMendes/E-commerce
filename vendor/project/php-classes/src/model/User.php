@@ -149,7 +149,7 @@
             ]);
         }
 
-        public static function getForgot(string $email) {
+        public static function getForgot(string $email, bool $isAdmin = true) {
             $result = self::select("SELECT * FROM tb_persons p INNER JOIN tb_users u USING(idpertson) WERE p.desemail = :email", ["email" => $email]);
             if (count($result) === 0) {
                 throw new \Exception('Não foi possível recuperar a senha!');
@@ -167,6 +167,9 @@
                         openssl_encrypt($hashRecovery["idrecovery"], "AES-128-CBC", pack("a16", User::SECRET), 0, pack("a16", User::SECRET_IV))
                     );
                     $link = "http://www.atanael.com.br/gestao/forgot/reset?code=$code";
+                    if (!$isAdmin) {
+                        $link = "http://www.atanael.com.br/forgot/reset?code=$code";
+                    }
                     $mailer = new Mailer($user["desemail"], $user["desperson"], "Redefinir senha E-commerce", "forgot", [
                         "name" => $user["desperson"],
                         "link" => $link
@@ -251,6 +254,37 @@
                 ':deslogin'=>$login
             ]);
             return (count($results) > 0);
+        }
+
+        /**
+         * verifica o formulário de cadastro de usuário
+         *
+         * @param arrary $request
+         * @return void
+         */
+        public static function verifyRequestCad(array $request) {
+            if (empty($request["name"])  || strlen($request["name"]) < 3) {
+                User::setMsgErrorRegister("Nome é obrigatorio e mínimo de 3 letras");
+                header("Location: /login");
+                exit;
+            }
+            $emailRegex = "/^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z])+?$/i";
+            $isemail = preg_match($emailRegex, $request["email"]);
+            if (empty($request["email"])  || !$isemail) {
+                User::setMsgErrorRegister("Informe um E-mail válido");
+                header("Location: /login");
+                exit;
+            }
+            if (User::checkLoginExist($request["email"])) {
+                User::setMsgErrorRegister("Este E-mail já está em uso");
+                header("Location: /login");
+                exit;
+            }
+            if (empty($request["password"])  || strlen($request["password"]) < 6) {
+                User::setMsgErrorRegister("Senha é obrigatorio, mínimo de 6 caracteres");
+                header("Location: /login");
+                exit;
+            }
         }
 
         private static function select(string $query, array $bind = []) : array {

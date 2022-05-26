@@ -16,7 +16,7 @@ $app->get('/gestao/forgot', function() {
 
 // POST tela esqueceu a senha
 $app->post('/gestao/forgot', function() {
-	$user = User::getForgot($_POST["email"]);
+	User::getForgot($_POST["email"]);
 	header("Location: /gestao/forgot/sent");
 	exit;
 });
