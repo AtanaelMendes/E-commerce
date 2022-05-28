@@ -49,7 +49,8 @@ $app->get('/cart', function(){
 	$page = new PageController();
 	$page->setTpl("cart", [
 		"cart" => $cart->expose(),
-		"products" => $cart->getProducts()
+		"products" => $cart->getProducts(),
+		"error" => $cart->getMsgError()
 	]);
 });
 
@@ -97,15 +98,44 @@ $app->post('/cart/freight', function() {
 // finalizar compra
 $app->get("/checkout", function() {
 	User::verifyLogin(false);
-	$cart = Cart::getFromSession();
 	$address = new Address();
+	$cart = Cart::getFromSession();
 	$page = new PageController();
+	if (!empty($_GET["zipcode"])) {
+		$_GET["zipcode"] = $cart->getdeszipcode();
+	}
+	if (!empty($_GET["zipcode"])) {
+		$address->loadFromCEP($_GET["zipcode"]);
+		$cart->setdeszipcode($_GET["zipcode"]);
+		$cart->save();
+		$cart->getCalculateTotal();
+	}
+	if (!$address->getdesaddress()) {$address->setdesaddress("");}
+	if (!$address->getdescomplement()) {$address->setdescomplement("");}
+	if (!$address->getdesdistrict()) {$address->setdesdistrict("");}
+	if (!$address->getdescity()) {$address->setdescity("");}
+	if (!$address->getdesstate()) {$address->setdesstate("");}
+	if (!$address->getdescountry()) {$address->setdescountry("");}
+	if (!$address->getdeszipcode()) {$address->setdeszipcode("");}
 	$page->setTpl("checkout", [
 		"cart" => $cart->expose(),
 		"address" => $address->expose(),
-		"error" => ""
+		"error" => Address::getMsgError(),
+		"products" => $cart->getProducts()
 	]);
+});
 
+$app->post("/checkout", function() {
+	User::verifyLogin(false);
+	Address::verifyAddressRequest($_POST);
+	$user = User::getFromSession();
+	$address = new Address();
+	$_POST["deszipcode"] = $_POST["zipcode"];
+	$_POST["idperson"] = $user->getidperson();
+	$address->setData($_POST);
+	$address->save();
+	header("Location: /order");
+	exit;
 });
 
 // login de usuário

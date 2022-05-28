@@ -166,7 +166,7 @@ class Cart extends BaseModel {
 				'nCdEmpresa'=>'',
 				'sDsSenha'=>'',
 				'nCdServico'=>'40010',
-				'sCepOrigem'=>'09853120',
+				'sCepOrigem'=>'78550001',
 				'sCepDestino'=>$zipcode,
 				'nVlPeso'=>$totals['vlweight'],
 				'nCdFormato'=>'1',
@@ -179,10 +179,8 @@ class Cart extends BaseModel {
 				'sCdAvisoRecebimento'=>'S'
 			]);
 
-            $xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx?".$params);
+            $xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$params);
             $result = $xml->Servicos->cServico;
-
-            self::dd($result);
 
 			if ($result->MsgErro != '') {
 				Cart::setMsgError($result->MsgErro);

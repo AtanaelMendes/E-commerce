@@ -35,17 +35,29 @@ class Address extends BaseModel {
 	public function save() {
 		$sql = new Sql();
 
-		$results = $sql->select("CALL sp_addresses_save(:idaddress, :idperson, :desaddress, :desnumber, :descomplement, :descity, :desstate, :descountry, :deszipcode, :desdistrict)", [
-			':idaddress'=>$this->getidaddress(),
-			':idperson'=>$this->getidperson(),
-			':desaddress'=>utf8_decode($this->getdesaddress()),
-			':desnumber'=>$this->getdesnumber(),
-			':descomplement'=>utf8_decode($this->getdescomplement()),
-			':descity'=>utf8_decode($this->getdescity()),
-			':desstate'=>utf8_decode($this->getdesstate()),
-			':descountry'=>utf8_decode($this->getdescountry()),
-			':deszipcode'=>$this->getdeszipcode(),
-			':desdistrict'=>$this->getdesdistrict()
+		$results = $sql->select(
+			"CALL sp_addresses_save(
+				:idaddress,
+				:idperson,
+				:desaddress,
+				:desnumber,
+				:descomplement,
+				:descity,
+				:desstate,
+				:descountry,
+				:deszipcode,
+				:desdistrict
+			)", [
+			'idaddress'=>$this->getidaddress(),
+			'idperson'=>$this->getidperson(),
+			'desaddress'=>$this->getdesaddress(), //utf8_decode($this->getdesaddress()),
+			'desnumber'=>$this->getdesnumber(),
+			'descomplement'=>$this->getdescomplement(), //utf8_decode($this->getdescomplement()),
+			'descity'=>$this->getdescity(), //utf8_decode($this->getdescity()),
+			'desstate'=>$this->getdesstate(), //utf8_decode($this->getdesstate()),
+			'descountry'=>$this->getdescountry(), //utf8_decode($this->getdescountry()),
+			'deszipcode'=>$this->getdeszipcode(),
+			'desdistrict'=>$this->getdesdistrict()
 		]);
 
 		if (count($results) > 0) {
@@ -65,5 +77,38 @@ class Address extends BaseModel {
 
 	public static function clearMsgError() {
 		$_SESSION[Address::SESSION_ERROR] = NULL;
+	}
+
+	public static function verifyAddressRequest(array $request) {
+		if (empty($request["zipcode"]) && strlen($request["zipcode"]) < 8) {
+			Address::setMsgError("informe o CEP");
+			header("Location: /checkout");
+			exit;
+		}
+		if (empty($request["desaddress"]) && strlen($request["desaddress"]) < 5) {
+			Address::setMsgError("informe o endereço");
+			header("Location: /checkout");
+			exit;
+		}
+		if (empty($request["desdistrict"]) && strlen($request["desdistrict"]) < 4) {
+			Address::setMsgError("informe o bairro");
+			header("Location: /checkout");
+			exit;
+		}
+		if (empty($request["descity"]) && strlen($request["descity"]) < 4) {
+			Address::setMsgError("informe a cidade");
+			header("Location: /checkout");
+			exit;
+		}
+		if (empty($request["desstate"]) && strlen($request["desstate"]) < 2) {
+			Address::setMsgError("informe o estado");
+			header("Location: /checkout");
+			exit;
+		}
+		if (empty($request["descountry"]) && strlen($request["descountry"]) < 2) {
+			Address::setMsgError("informe o país");
+			header("Location: /checkout");
+			exit;
+		}
 	}
 }
