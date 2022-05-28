@@ -1,5 +1,6 @@
 <?php
 use \Rootdir\Model\User;
+use \Rootdir\Model\Cart;
 
 function formatNumber($number) {
     $valpice = ($number > 0 ? $number : 0);
@@ -13,4 +14,16 @@ function checkLogin(bool $isadmin = true) :bool {
 function getUserName() : ?string {
     $user = User::getFromSession();
     return $user->getdesperson();
+}
+
+function getCartNrqtd() {
+    $cart = Cart::getFromSession();
+    $totals = $cart->getProductsTotals();
+    return $totals["qtprod"];
+}
+
+function getCartVlprice() {
+    $cart = Cart::getFromSession();
+    $totals = $cart->getProductsTotals();
+    return formatNumber($totals["vlprice"]);
 }
