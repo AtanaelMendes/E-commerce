@@ -55,7 +55,7 @@
             );
 
             if (count($result) <= 0) {
-                throw new \Exception('Usuário não existe ou senha inválida');
+                self::setMsgError('Usuário não existe ou senha inválida');
             }
 
             $data = $result[0];
@@ -69,7 +69,7 @@
                 $_SESSION[User::SESSION] = $user->expose();
                 return $user;
             } else {
-                throw new \Exception('Usuário não existe ou senha inválida');
+                self::setMsgError('Usuário não existe ou senha inválida');
             }
         }
 

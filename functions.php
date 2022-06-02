@@ -7,6 +7,10 @@ function formatNumber($number) {
     return number_format($valpice, 2, ",", ".");
 }
 
+function formatDate($date) {
+    return date("d/m/Y", strtotime($date));
+}
+
 function checkLogin(bool $isadmin = true) :bool {
     return User::checkLogin($isadmin);
 }

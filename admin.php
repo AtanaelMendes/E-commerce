@@ -17,7 +17,9 @@ $app->get('/gestao/login', function() {
 		"header" => false,
 		"footer" => false
 	]);
-	$page->setTpl("login");
+	$page->setTpl("login", [
+		"error" => User::getMsgError(),
+	]);
 });
 
 //login

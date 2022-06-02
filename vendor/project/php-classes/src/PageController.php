@@ -1,6 +1,7 @@
 <?php
 namespace Rootdir;
 
+use Rootdir\Model\User;
 use Rain\Tpl;
 
 class PageController {
@@ -25,6 +26,15 @@ class PageController {
         ];
 
         Tpl::configure($config);
+
+        $user = User::getFromSession();
+
+        $this->options["data"] = array_merge($this->options["data"], ["userlogged" => []]);
+
+        
+        if ($user) {
+            $this->options["data"] = array_merge($this->options["data"], ["userlogged" => $user->expose()]);
+        }
 
         $this->setData($this->options["data"]);
 
