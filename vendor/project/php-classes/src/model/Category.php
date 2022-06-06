@@ -91,13 +91,13 @@
         public function getPagination(int $page = 1, int $pageItems = 3) {
             $start = (($page - 1) * $pageItems);
 
-            $result = self::select("
-                SELECT  a.*,
+            $result = self::select(
+                "SELECT  a.*,
                         temptb.qtreg
                 FROM    tb_products a
                         INNER JOIN tb_productscategories b USING(idproduct)
                         INNER JOIN tb_categories c USING(idcategory)
-                        LEFT outer JOIN (
+                        LEFT OUTER JOIN (
                             SELECT 	count(*) as qtreg, idcategory
                             FROM 	tb_productscategories bb
                             where idcategory = :idcategory1

@@ -98,7 +98,9 @@
             return self::select(
                 "SELECT usr.*, per.*
                 FROM    tb_users usr
-                        INNER JOIN tb_persons per USING (idperson) ORDER BY per.desperson"
+                        INNER JOIN tb_persons per
+                        USING (idperson)
+                ORDER BY per.desperson"
             );
         }
 
@@ -337,6 +339,54 @@
                 "iduser" => $this->getiduser()
             ]);
             return $result;
+        }
+
+        public static function getPagination(int $page = 1, int $pageItems = 3, ?string $search = "") {
+            $start = (($page - 1) * $pageItems);
+            $bind = [];
+            $sqlWhere = "";
+
+            if (!empty($search)) {
+                $sqlWhere = "WHERE (per.desperson LIKE :search2 OR per.desemail = :search3 OR usr.deslogin LIKE :search4)";
+                $bind = [
+                    "search1" => "%$search%",
+                    "search2" => "%$search%",
+                    "search3" => "%$search%",
+                    "search4" => "%$search%"
+                ];
+            }
+
+            $result = self::select(
+                "SELECT usr.*,
+                        per.*,
+                        temptb.qtuser
+                FROM    tb_users usr
+                        INNER JOIN tb_persons per
+                        USING (idperson)
+                        LEFT OUTER JOIN (
+                            SELECT COUNT(*) AS qtuser, iduser FROM tb_users
+                            ".(!empty($search) ? "WHERE (deslogin LIKE :search1)" : "")."
+                        ) temptb on (1 = 1)
+                $sqlWhere
+                ORDER BY per.desperson
+                LIMIT {$start}, {$pageItems}", $bind
+            );
+
+            $pages = [];
+            for ($pg=1; $pg <= ceil($result[0]["qtuser"] / $pageItems); $pg++) {
+                array_push($pages, [
+                    "href" => "/gestao/users?".http_build_query([
+                        "page" => $pg,
+                        "search" => $search
+                    ]),
+                    "text" => $pg
+                ]);
+            }
+            
+            return [
+                "data" => $result,
+                "pages" => $pages
+            ];
         }
 
         private static function select(string $query, array $bind = []) : array {

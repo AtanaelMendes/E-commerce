@@ -39,10 +39,15 @@ $app->get('/gestao/logout', function() {
 // consulta user
 $app->get('/gestao/users', function() {
 	User::verifyLogin();
-	$users = User::listAll();
 	$page = new PageAdminController();
+	$search = $_GET["search"] ?? "";
+	$pg = (!empty($_GET["page"]) ? (int)$_GET["page"] : 1);
+	$pagination = User::getPagination($pg, 3, $search);
+
 	$page->setTpl("users", [
-		"users"	=> $users
+		"users"	=> $pagination["data"],
+		"search" => $search,
+		"pages" => $pagination["pages"]
 	]);
 });
 
