@@ -7,10 +7,15 @@ use \Rootdir\Model\Product;
 // tela lista categoria
 $app->get('/gestao/categorias', function() {
 	User::verifyLogin();
-	$category = Category::listAll();
+	$search = $_GET["search"] ?? "";
+	$pg = (!empty($_GET["page"]) ? (int)$_GET["page"] : 1);
+	$pagination = Category::getPaginationAdmin($pg, 3, $search);
+
 	$page = new PageAdminController();
 	$page->setTpl("categories", [
-		"categories" => $category
+		"categories" => $pagination["data"],
+		"search" => $search,
+		"pages" => $pagination["pages"]
 	]);
 	exit;
 });

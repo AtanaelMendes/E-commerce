@@ -123,6 +123,49 @@
             ];
         }
 
+        public static function getPaginationAdmin(int $page = 1, int $pageItems = 3, ?string $search = "") {
+            $start = (($page - 1) * $pageItems);
+            $bind = [];
+            $sqlWhere = "";
+
+            if (!empty($search)) {
+                $sqlWhere = "WHERE (cat.descategory LIKE :search2)";
+                $bind = [
+                    "search1" => "%$search%",
+                    "search2" => "%$search%"
+                ];
+            }
+
+            $result = self::select(
+                "SELECT cat.*,
+                        temptb.qtcategories
+                FROM    tb_categories cat
+                        LEFT OUTER JOIN (
+                            SELECT COUNT(*) AS qtcategories, idcategory FROM tb_categories
+                            ".(!empty($search) ? "WHERE (descategory LIKE :search1)" : "")."
+                        ) temptb on (1 = 1)
+                {$sqlWhere}
+                ORDER BY descategory
+                LIMIT {$start}, {$pageItems}", $bind
+            );
+
+            $pages = [];
+            for ($pg=1; $pg <= ceil($result[0]["qtcategories"] / $pageItems); $pg++) {
+                array_push($pages, [
+                    "href" => "/gestao/categorias?".http_build_query([
+                        "page" => $pg,
+                        "search" => $search
+                    ]),
+                    "text" => $pg
+                ]);
+            }
+            
+            return [
+                "data" => $result,
+                "pages" => $pages
+            ];
+        }
+
         private static function select(string $query, array $bind = []) : array {
             $DAO = new Sql();
             return $DAO->select($query, $bind);

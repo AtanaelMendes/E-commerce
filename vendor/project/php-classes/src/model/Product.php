@@ -95,14 +95,9 @@
                     break;
             }
 
-            
-
             $newImg = self::getFullPath().$this->getidproduct().".jpg";
-
             imagejpeg($img, $newImg);
-
             imagedestroy($img);
-
             $this->checkPhoto();
         }
 
@@ -140,6 +135,49 @@
                 "SELECT * FROM tb_categories a INNER JOIN tb_productscategories b USING(idcategory) WHERE b.idproduct = :idproduct", [
                 "idproduct" => $this->getidproduct()
             ]);
+        }
+
+        public static function getPaginationAdmin(int $page = 1, int $pageItems = 3, ?string $search = "") {
+            $start = (($page - 1) * $pageItems);
+            $bind = [];
+            $sqlWhere = "";
+
+            if (!empty($search)) {
+                $sqlWhere = "WHERE (prod.desproduct LIKE :search2)";
+                $bind = [
+                    "search1" => "%$search%",
+                    "search2" => "%$search%"
+                ];
+            }
+
+            $result = self::select(
+                "SELECT prod.*,
+                        temptb.qtprod
+                FROM    tb_products prod
+                        LEFT OUTER JOIN (
+                            SELECT COUNT(*) AS qtprod, idproduct FROM tb_products
+                            ".(!empty($search) ? "WHERE (desproduct LIKE :search1)" : "")."
+                        ) temptb on (1 = 1)
+                {$sqlWhere}
+                ORDER BY desproduct
+                LIMIT {$start}, {$pageItems}", $bind
+            );
+
+            $pages = [];
+            for ($pg=1; $pg <= ceil($result[0]["qtprod"] / $pageItems); $pg++) {
+                array_push($pages, [
+                    "href" => "/gestao/produtos?".http_build_query([
+                        "page" => $pg,
+                        "search" => $search
+                    ]),
+                    "text" => $pg
+                ]);
+            }
+            
+            return [
+                "data" => $result,
+                "pages" => $pages
+            ];
         }
 
         public static function getFullPath() {

@@ -9,10 +9,15 @@ use \Rootdir\Model\Product;
 // admin produto
 $app->get('/gestao/produtos', function() {
 	User::verifyLogin();
-	$products = Product::listAll();
+	$search = $_GET["search"] ?? "";
+	$pg = (!empty($_GET["page"]) ? (int)$_GET["page"] : 1);
+	$pagination = Product::getPaginationAdmin($pg, 3, $search);
+
 	$page = new PageAdminController();
 	$page->setTpl("products", [
-		"products"	=> $products
+		"products" => $pagination["data"],
+		"search" => $search,
+		"pages" => $pagination["pages"]
 	]);
     exit;
 });
