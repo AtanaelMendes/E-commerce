@@ -65,8 +65,14 @@ $app->get("/gestao/orders/:idorder", function($idorder) {
 // lista gestao de pedidos
 $app->get("/gestao/orders", function() {
     User::verifyLogin();
+    $search = $_GET["search"] ?? "";
+	$pg = (!empty($_GET["page"]) ? (int)$_GET["page"] : 1);
+	$pagination = Order::getPaginationAdmin($pg, 3, $search);
+
     $page = new PageAdminController();
     $page->setTpl("orders", [
-        "orders" => Order::listAll()
+        "orders" => $pagination["data"],
+		"search" => $search,
+		"pages" => $pagination["pages"]
     ]);
 });

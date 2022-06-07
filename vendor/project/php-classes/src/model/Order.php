@@ -108,6 +108,51 @@ class Order extends BaseModel {
         $_SESSION[self::SUCCESS] = null;
     }
 
+    public static function getPaginationAdmin(int $page = 1, int $pageItems = 3, ?string $search = "") {
+        $start = (($page - 1) * $pageItems);
+        $bind = [];
+        $sqlWhere = "";
+
+        if (!empty($search)) {
+            $sqlWhere = "WHERE (a.idorder = :idorder OR f.desperson = :search1)";
+            $bind = [
+                "idorder" => $search,
+                "search1" => "%$search%"
+            ];
+        }
+
+        $result = self::select(
+            "SELECT SQL_CALC_FOUND_ROWS *
+            FROM    tb_orders a
+                    INNER JOIN tb_ordersstatus b USING(idstatus)
+                    INNER JOIN tb_carts c USING(idcart)
+                    INNER JOIN tb_users d ON d.iduser = a.iduser
+                    INNER JOIN tb_addresses e USING(idaddress)
+                    INNER JOIN tb_persons f ON f.idperson = d.idperson
+            {$sqlWhere}
+            ORDER BY a.dtregister DESC
+            LIMIT {$start}, {$pageItems}", $bind
+        );
+
+        $qtorders = self::select("SELECT FOUND_ROWS() as qtorders");
+
+        $pages = [];
+        for ($pg=1; $pg <= ceil($qtorders[0]["qtorders"] / $pageItems); $pg++) {
+            array_push($pages, [
+                "href" => "/gestao/orders?".http_build_query([
+                    "page" => $pg,
+                    "search" => $search
+                ]),
+                "text" => $pg
+            ]);
+        }
+        
+        return [
+            "data" => $result,
+            "pages" => $pages
+        ];
+    }
+
     private static function select(string $query, array $bind = []) : array {
         $DAO = new Sql();
         return $DAO->select($query, $bind);
