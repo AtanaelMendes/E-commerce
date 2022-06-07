@@ -36,6 +36,46 @@ $app->get('/gestao/logout', function() {
 	exit();
 });
 
+// tela alterar senha usuario
+$app->get("/gestao/users/:iduser/password", function($iduser) {
+	User::verifyLogin();
+	$user = new User();
+	$user->get((int)$iduser);
+	$page = new PageAdminController();
+	$page->setTpl("users-password", [
+		"user" => $user->expose(),
+		"msgError" => User::getMsgError(),
+		"msgSuccess" => User::getSuccess()
+	]);
+});
+
+// POST alterar senha usuario
+$app->post("/gestao/users/:iduser/password", function($iduser) {
+	User::verifyLogin();
+
+	if (empty($_POST["despassword"]) || strlen($_POST["despassword"]) < 6) {
+		User::setMsgError("Preencha a nova senha");
+		header("Location: /gestao/users/$iduser/password");
+		exit;
+	}
+	if (empty($_POST["despassword-confirm"]) || strlen($_POST["despassword-confirm"]) < 6) {
+		User::setMsgError("Preencha a confirmação da senha");
+		header("Location: /gestao/users/$iduser/password");
+		exit;
+	}
+	if ($_POST["despassword"] !== $_POST["despassword-confirm"]) {
+		User::setMsgError("As senhas não conferem");
+		header("Location: /gestao/users/$iduser/password");
+		exit;
+	}
+	$user = new User();
+	$user->get((int)$iduser);
+	$user->setPassword($_POST["despassword"]);
+	User::setSuccess("Senha alterada com sucesso");
+	header("Location: /gestao/users/$iduser/password");
+	exit;
+});
+
 // consulta user
 $app->get('/gestao/users', function() {
 	User::verifyLogin();
